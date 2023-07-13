@@ -10,12 +10,10 @@ import UIKit
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    private let loopTimer = LoopTimer()
+    private let gameLauncher = GameLauncher()
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        loopTimer.delegate = self
-        loopTimer.initTimer()
-        loopTimer.startTimer()
+        gameLauncher.start()
         return true
     }
 
@@ -34,10 +32,4 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
 
-}
-
-extension AppDelegate: LoopTimerDelegate {
-    func loopTimerTimerDidFire(_ loopTimer: LoopTimer, with countdown: Int) {
-        print(countdown)
-    }
 }
