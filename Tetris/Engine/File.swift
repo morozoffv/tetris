@@ -1,12 +1,18 @@
 import Foundation
 import UIKit
 
+protocol GameLauncherDelegate: AnyObject {
+    func didUpdate(string: String)
+}
+
 final class GameLauncher {
 
     private let loopTimer: LoopTimer
     private let playfield: Playfield
     private let shapeFactory: ShapeFactory
     
+    weak var delegate: GameLauncherDelegate?
+        
     init() {
         self.loopTimer = LoopTimer()
         self.shapeFactory = ShapeFactory()
@@ -26,11 +32,28 @@ final class GameLauncher {
     func end() {
         loopTimer.stopTimer()
     }
+    
+    //TODO: try to find better relationships
+    func leftDidTapped() {
+        playfield.move(x: -1)
+    }
+    
+    func rightDidTapped() {
+        playfield.move(x: 1)
+    }
+    
+    func rotateDidTapped() {
+    }
 }
 
 extension GameLauncher: PlayfieldDelegate {
     func playfieldGameEnded() {
         loopTimer.stopTimer()
+    }
+    
+    //TODO: do better
+    func didRedraw(string: String) {
+        delegate?.didUpdate(string: string)
     }
 }
 
@@ -83,6 +106,7 @@ final class ShapeFactory {
 
 protocol PlayfieldDelegate: AnyObject {
     func playfieldGameEnded()
+    func didRedraw(string: String)
 }
 
 final class Playfield {
@@ -169,20 +193,24 @@ final class Playfield {
             }
         }
 
+        var result: String = ""
         for i in 0..<transpondedPresentationField.count {
             var row = ""
             for j in 0..<transpondedPresentationField[i].count {
                 let element = transpondedPresentationField[i][j]
                 if element {
-                    row.append("*")
+                    row.append("●")
                 } else {
-                    row.append("o")
+                    row.append("○")
                 }
             }
             print(row)
+            result.append("\(row)\n")
             row = ""
         }
 //        print("\n")
+        
+        delegate?.didRedraw(string: result)
     }
     
     func placeShapeOnField() {
@@ -220,6 +248,8 @@ extension PlayfieldConfiguration {
 }
 
 // What to do on left/right/rotate
-final class InputHandler {
-
+protocol InputHandler: AnyObject {
+    func leftDidTapped()
+    func rightDidTapped()
+    func rotateDidTapped()
 }
