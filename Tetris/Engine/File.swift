@@ -63,12 +63,15 @@ struct Shape {
     var offset: CGPoint = CGPoint(x: 5, y: 0)
     
     func rotated() -> Shape {
-        let centerX = Int(round(points.reduce(0) { $0 + $1.x } / CGFloat(points.count)))
-        let centerY = Int(round(points.reduce(0) { $0 + $1.y } / CGFloat(points.count)))
+//        let centerX = Int(round(points.reduce(0) { $0 + $1.x } / CGFloat(points.count)))
+//        let centerY = Int(round(points.reduce(0) { $0 + $1.y } / CGFloat(points.count)))
+        
+        let centerX: CGFloat = points[1].x
+        let centerY: CGFloat = points[1].y
         
         let rotatedPoints: [CGPoint] = points.map { point in
-            let deltaX = Int(point.x) - centerX
-            let deltaY = Int(point.y) - centerY
+            let deltaX = point.x - centerX
+            let deltaY = point.y - centerY
             let rotatedX = centerX - deltaY
             let rotatedY = centerY + deltaX
             return CGPoint(x: rotatedX, y: rotatedY)
