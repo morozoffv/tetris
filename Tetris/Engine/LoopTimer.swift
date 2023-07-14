@@ -14,7 +14,7 @@ final class LoopTimer {
             
     func startTimer() {
         timer = Timer.scheduledTimer(
-            timeInterval: 1,
+            timeInterval: 1 / 2,
             target: self,
             selector: #selector(timerFired),
             userInfo: nil,
