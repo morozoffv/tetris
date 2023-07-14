@@ -119,10 +119,7 @@ final class Playfield {
     private let shapeFactory: ShapeFactory
     
     weak var delegate: PlayfieldDelegate?
-    
-    //TODO: move?
-    private var isGameOver: Bool = false
-    
+        
     init(config: PlayfieldConfiguration, shapeFactory: ShapeFactory) {
         
         self.config = config
@@ -171,6 +168,7 @@ final class Playfield {
         return false
     }
     
+    //TODO: refactor
     func redraw() {
         presentationField = field
         
@@ -221,13 +219,36 @@ final class Playfield {
             field[x][y] = true
         }
         
-        // add removal of row
+        removeRowsIfNeeded()
         
         currentShape = shapeFactory.generate()
         
         //TODO: adapt to config
         if doesCollide(xOffset: 5, yOffset: 0) {
             delegate?.playfieldGameEnded()
+        }
+    }
+    
+    func removeRowsIfNeeded() {
+        var spaceBetweenColumns = false
+        for j in (0..<config.height + 1).reversed() {
+            for i in 0..<config.width {
+                spaceBetweenColumns = !field[i][j]
+                if spaceBetweenColumns {
+                    break
+                }
+            }
+            if !spaceBetweenColumns {
+                removeRow(row: j)
+            }
+        }
+    }
+    
+    private func removeRow(row: Int) {
+        for j in (0..<row - 1).reversed() {
+            for i in 1..<config.width {
+                field[i][j + 1] = field[i][j]
+            }
         }
     }
 }
