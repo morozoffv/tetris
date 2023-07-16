@@ -44,14 +44,14 @@ class ViewController: UIViewController {
         label.translatesAutoresizingMaskIntoConstraints = false
         
         view.addConstraints([
-            leftButton.leftAnchor.constraint(equalTo: view.leftAnchor),
-            leftButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            leftButton.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16),
+            leftButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             
-            rightButton.rightAnchor.constraint(equalTo: view.rightAnchor),
-            rightButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            rightButton.rightAnchor.constraint(equalTo: view.rightAnchor, constant: -16),
+            rightButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
             
             rotateButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
-            rotateButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            rotateButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
 
             label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             label.leftAnchor.constraint(equalTo: view.leftAnchor),
@@ -77,10 +77,13 @@ class ViewController: UIViewController {
 //TODO: do better
 extension ViewController: GameLauncherDelegate {
     func didUpdate(string: String) {
-        let attributedString = NSMutableAttributedString(string: string)
-        attributedString.addAttribute(NSAttributedString.Key.kern,
-                                      value: 5,
-                                      range: NSMakeRange(0, string.count - 1))
-        label.attributedText = attributedString
+//        let attributedString = NSMutableAttributedString(string: string)
+//        attributedString.addAttribute(NSAttributedString.Key.kern,
+//                                      value: 5,
+//                                      range: NSMakeRange(0, string.count - 1))
+//        label.attributedText = attributedString
+        
+        
+        label.text = string
     }
 }

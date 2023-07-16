@@ -296,28 +296,57 @@ final class Playfield {
         }
     }
     
+//    func removeRowsIfNeeded() {
+//        var spaceBetweenColumns = false
+//        for j in (0..<config.height).reversed() {
+//            for i in 0..<config.width {
+//                spaceBetweenColumns = !field[i][j]
+//                if spaceBetweenColumns {
+//                    break
+//                }
+//            }
+//            if !spaceBetweenColumns {
+//                removeRow(row: j)
+//            }
+//        }
+//    }
+    
+    
     func removeRowsIfNeeded() {
         var spaceBetweenColumns = false
-        for j in (0..<config.height).reversed() {
-            for i in 0..<config.width {
-                spaceBetweenColumns = !field[i][j]
-                if spaceBetweenColumns {
+        var j = 20
+        while j >= 1 {
+            j -= 1
+            spaceBetweenColumns = false
+            for i in 0...9 {
+                if field[i][j] == false {
+                    spaceBetweenColumns = true
                     break
                 }
             }
             if !spaceBetweenColumns {
                 removeRow(row: j)
+                j += 1
             }
         }
     }
+
     
     private func removeRow(row: Int) {
-        for j in (0..<row - 1).reversed() {
-            for i in 1..<config.width {
+        for j in (0..<row).reversed() {
+            for i in 0...9 {
                 field[i][j + 1] = field[i][j]
             }
         }
     }
+    
+//    private func removeRow(row: Int) {
+//        for j in 0...row {
+//            for i in 0..<config.width {
+//                field[i][j] = field[i][j - 1]
+//            }
+//        }
+//    }
 }
 
 extension Playfield: LoopTimerDelegate {
