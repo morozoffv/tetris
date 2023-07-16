@@ -14,7 +14,8 @@ class ViewController: UIViewController {
     let leftButton = UIButton(type: .system)
     let rightButton = UIButton(type: .system)
     let rotateButton = UIButton(type: .system)
-    
+    let retryButton = UIButton(type: .system)
+
     let label = UILabel()
 
     override func viewDidLoad() {
@@ -25,22 +26,26 @@ class ViewController: UIViewController {
         leftButton.addTarget(self, action: #selector(leftButtonDidTapped), for: .touchUpInside)
         rightButton.addTarget(self, action: #selector(rightButtonDidTapped), for: .touchUpInside)
         rotateButton.addTarget(self, action: #selector(rotateButtonDidTapped), for: .touchUpInside)
+        retryButton.addTarget(self, action: #selector(retryButtonDidTapped), for: .touchUpInside)
         
         leftButton.setTitle("Left", for: .normal)
         rightButton.setTitle("Right", for: .normal)
         rotateButton.setTitle("Rotate", for: .normal)
-        
+        retryButton.setTitle("Retry", for: .normal)
+
         label.numberOfLines = 0
         label.textAlignment = .center
         
         view.addSubview(leftButton)
         view.addSubview(rightButton)
         view.addSubview(rotateButton)
+        view.addSubview(retryButton)
         view.addSubview(label)
         
         leftButton.translatesAutoresizingMaskIntoConstraints = false
         rightButton.translatesAutoresizingMaskIntoConstraints = false
         rotateButton.translatesAutoresizingMaskIntoConstraints = false
+        retryButton.translatesAutoresizingMaskIntoConstraints = false
         label.translatesAutoresizingMaskIntoConstraints = false
         
         view.addConstraints([
@@ -52,6 +57,9 @@ class ViewController: UIViewController {
             
             rotateButton.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             rotateButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
+            
+            retryButton.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16),
+            retryButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
 
             label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             label.leftAnchor.constraint(equalTo: view.leftAnchor),
@@ -70,6 +78,10 @@ class ViewController: UIViewController {
     
     @objc func rotateButtonDidTapped() {
         gameLauncher.rotateDidTapped()
+    }
+    
+    @objc func retryButtonDidTapped() {
+        gameLauncher.clean()
     }
 
 }

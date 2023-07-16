@@ -33,6 +33,12 @@ final class GameLauncher {
         loopTimer.stopTimer()
     }
     
+    func clean() {
+        loopTimer.stopTimer()
+        playfield.setupField()
+        loopTimer.startTimer()
+    }
+    
     //TODO: try to find better relationships
     func leftDidTapped() {
         playfield.move(x: -1)
@@ -169,7 +175,7 @@ final class Playfield {
     private var field: Array<Array<Bool>> = []
     private var presentationField: Array<Array<Bool>> = []
 
-    private var currentShape: Shape
+    private var currentShape: Shape = Shape(points: [])
     
     private let config: PlayfieldConfiguration
     private let shapeFactory: ShapeFactory
@@ -177,15 +183,10 @@ final class Playfield {
     weak var delegate: PlayfieldDelegate?
         
     init(config: PlayfieldConfiguration, shapeFactory: ShapeFactory) {
-        
         self.config = config
         self.shapeFactory = shapeFactory
         
-        for _ in 0..<config.width {
-            field.append(Array(repeating: false, count: config.height))
-        }
-        presentationField = field
-        currentShape = shapeFactory.generate()
+        setupField()
     }
 
     func update(with countdown: Int) {
@@ -347,6 +348,15 @@ final class Playfield {
 //            }
 //        }
 //    }
+    
+    func setupField() {
+        field = []
+        for _ in 0..<config.width {
+            field.append(Array(repeating: false, count: config.height))
+        }
+        presentationField = field
+        currentShape = shapeFactory.generate()
+    }
 }
 
 extension Playfield: LoopTimerDelegate {
