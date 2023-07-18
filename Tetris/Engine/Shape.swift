@@ -86,7 +86,6 @@ struct Shape {
         self.offset = offset
     }
     
-    //TODO: refactor
     func rotated() -> Shape {
         guard type != .square else { return self }
         

@@ -1,55 +1,85 @@
-//
-//  ViewController.swift
-//  Tetris
-//
-//  Created by Vladislav Morozov on 09.07.2023.
-//
-
 import UIKit
 
-class ViewController: UIViewController {
-    
-    private var gameCoordinator: GameCoordinatorInput!  //TODO: fix
-    
-    let leftButton = UIButton(type: .system)
-    let rightButton = UIButton(type: .system)
-    let rotateButton = UIButton(type: .system)
-    let retryButton = UIButton(type: .system)
+protocol ViewInput: AnyObject {
+    func redraw(string: String)
+}
 
-    let label = UILabel()
+protocol ViewOutput {
+    func onViewDidLoad()
+    func left()
+    func right()
+    func rotate()
+    func restart()
+}
+
+final class ViewController: UIViewController, ViewInput {
+    
+    var output: ViewOutput?
+        
+    private let leftButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Left", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private let rightButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Right", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+
+    private let rotateButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Rotate", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+
+    private let retryButton: UIButton = {
+        let button = UIButton(type: .system)
+        button.setTitle("Retry", for: .normal)
+        button.translatesAutoresizingMaskIntoConstraints = false
+        return button
+    }()
+    
+    private let gameField: UILabel = {
+        let label = UILabel()
+        label.numberOfLines = 0
+        label.textAlignment = .center
+        label.translatesAutoresizingMaskIntoConstraints = false
+        return label
+    }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        output?.onViewDidLoad()
         
-        gameCoordinator = GameAssembly().assemble(delegate: self)
-        
-        gameCoordinator.start()
-        
+        addSubviews()
+        setupConstraints()
+                
         leftButton.addTarget(self, action: #selector(leftButtonDidTapped), for: .touchUpInside)
         rightButton.addTarget(self, action: #selector(rightButtonDidTapped), for: .touchUpInside)
         rotateButton.addTarget(self, action: #selector(rotateButtonDidTapped), for: .touchUpInside)
         retryButton.addTarget(self, action: #selector(retryButtonDidTapped), for: .touchUpInside)
         
-        leftButton.setTitle("Left", for: .normal)
-        rightButton.setTitle("Right", for: .normal)
-        rotateButton.setTitle("Rotate", for: .normal)
-        retryButton.setTitle("Retry", for: .normal)
-
-        label.numberOfLines = 0
-        label.textAlignment = .center
-        
+        view.backgroundColor = .white
+    }
+    
+    func redraw(string: String) {
+        gameField.text = string
+    }
+    
+    private func addSubviews() {
         view.addSubview(leftButton)
         view.addSubview(rightButton)
         view.addSubview(rotateButton)
         view.addSubview(retryButton)
-        view.addSubview(label)
-        
-        leftButton.translatesAutoresizingMaskIntoConstraints = false
-        rightButton.translatesAutoresizingMaskIntoConstraints = false
-        rotateButton.translatesAutoresizingMaskIntoConstraints = false
-        retryButton.translatesAutoresizingMaskIntoConstraints = false
-        label.translatesAutoresizingMaskIntoConstraints = false
-        
+        view.addSubview(gameField)
+    }
+    
+    private func setupConstraints() {
         view.addConstraints([
             leftButton.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16),
             leftButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -16),
@@ -63,55 +93,26 @@ class ViewController: UIViewController {
             retryButton.leftAnchor.constraint(equalTo: view.leftAnchor, constant: 16),
             retryButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
 
-            label.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            label.leftAnchor.constraint(equalTo: view.leftAnchor),
-            label.rightAnchor.constraint(equalTo: view.rightAnchor),
-            label.bottomAnchor.constraint(equalTo: leftButton.topAnchor, constant: 16)
+            gameField.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            gameField.leftAnchor.constraint(equalTo: view.leftAnchor),
+            gameField.rightAnchor.constraint(equalTo: view.rightAnchor),
+            gameField.bottomAnchor.constraint(equalTo: leftButton.topAnchor, constant: 16)
         ])
     }
-
-    @objc func leftButtonDidTapped() {
-        gameCoordinator.left()
+    
+    @objc private func leftButtonDidTapped() {
+        output?.left()
     }
     
-    @objc func rightButtonDidTapped() {
-        gameCoordinator.right()
+    @objc private func rightButtonDidTapped() {
+        output?.right()
     }
     
-    @objc func rotateButtonDidTapped() {
-        gameCoordinator.rotate()
+    @objc private func rotateButtonDidTapped() {
+        output?.rotate()
     }
     
-    @objc func retryButtonDidTapped() {
-        gameCoordinator.restart()
-    }
-
-}
-
-//TODO: do better
-extension ViewController: GameCoordinatorDelegate {
-    func didRedrawPlayfield(_ coordinator: GameCoordinator, field: [[Bool]]) {
-        //        let attributedString = NSMutableAttributedString(string: string)
-        //        attributedString.addAttribute(NSAttributedString.Key.kern,
-        //                                      value: 5,
-        //                                      range: NSMakeRange(0, string.count - 1))
-        //        label.attributedText = attributedString
-        
-        var result: String = ""
-        for i in 0..<field.count {
-            var row = ""
-            for j in 0..<field[i].count {
-                let element = field[i][j]
-                if element {
-                    row.append("🐽")
-                } else {
-                    row.append("⬛")
-                }
-            }
-            result.append("\(row)\n")
-            row = ""
-        }
-
-        label.text = result
+    @objc private func retryButtonDidTapped() {
+        output?.restart()
     }
 }

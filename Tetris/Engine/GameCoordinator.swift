@@ -29,6 +29,8 @@ final class GameCoordinator: GameCoordinatorInput {
         self.loopTimer = loopTimer
     }
     
+    // MARK: - Public
+    
     func start() {
         loopTimer.start()
     }

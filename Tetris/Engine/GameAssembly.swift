@@ -2,7 +2,7 @@ import Foundation
 import UIKit
 
 final class GameAssembly {
-    func assemble(delegate: GameCoordinatorDelegate) -> GameCoordinatorInput {
+    func assemble() -> GameCoordinatorInput {
         let loopTimer = LoopTimer()
         let shapeFactory = ShapeFactory()
         let playfield = Playfield(configuration: GameConfiguration.default, shapeFactory: shapeFactory)
@@ -10,7 +10,6 @@ final class GameAssembly {
         
         loopTimer.delegate = gameCoordinator
         playfield.delegate = gameCoordinator
-        gameCoordinator.delegate = delegate
         
         return gameCoordinator
     }

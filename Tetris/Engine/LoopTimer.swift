@@ -19,7 +19,13 @@ final class LoopTimer: LoopTimerInput {
     init(configuration: GameConfiguration = .default) {
         self.configuration = configuration
     }
+    
+    deinit {
+        timer?.invalidate()
+    }
             
+    // MARK: - Public
+    
     func start() {
         timer = Timer.scheduledTimer(
             timeInterval: configuration.timerFireFrequency,
@@ -35,9 +41,7 @@ final class LoopTimer: LoopTimerInput {
         timer = nil
     }
 
-    deinit {
-        timer?.invalidate()
-    }
+    // MARK: - Private
     
     @objc private func timerFired() {
         delegate?.loopTimerDidFire(self)
