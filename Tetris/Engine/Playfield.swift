@@ -86,7 +86,6 @@ final class Playfield: PlayfieldInput {
         return false
     }
     
-    //TODO: refactor
     private func redraw() {
         presentationField = field
         
@@ -96,21 +95,23 @@ final class Playfield: PlayfieldInput {
             
             presentationField[x][y] = true
         }
-        
-        //TODO: change in place
-        var transpondedPresentationField: [[Bool]] = []
-        
-        for _ in 0..<configuration.height {
-            transpondedPresentationField.append(Array(repeating: false, count: configuration.width))
-        }
+                        
+        var transposedPresentationField: [[Bool]] = Array(
+            repeating:
+                Array(
+                    repeating: false,
+                    count: configuration.width
+                ),
+            count: configuration.height
+        )
         
         for i in 0..<presentationField.count {
             for j in 0..<presentationField[i].count {
-                transpondedPresentationField[j][i] = presentationField[i][j]
+                transposedPresentationField[j][i] = presentationField[i][j]
             }
         }
         
-        delegate?.didRedrawPlayfield(self, field: transpondedPresentationField)
+        delegate?.didRedrawPlayfield(self, field: transposedPresentationField)
     }
     
     private func placeShapeOnField() {
