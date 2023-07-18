@@ -2,19 +2,27 @@ import Foundation
 import UIKit
 
 protocol LoopTimerDelegate: AnyObject {
-    func loopTimerDidFire(_ loopTimer: LoopTimer, with countdown: Int)
+    func loopTimerDidFire(_ loopTimer: LoopTimer)
 }
 
-final class LoopTimer {
-    
-    private var countdown: Int = 0
+protocol LoopTimerInput {
+    func start()
+    func stop()
+}
+
+final class LoopTimer: LoopTimerInput {
+    private let configuration: GameConfiguration
     private var timer: Timer?
     
     weak var delegate: LoopTimerDelegate?
+    
+    init(configuration: GameConfiguration = .default) {
+        self.configuration = configuration
+    }
             
-    func startTimer() {
+    func start() {
         timer = Timer.scheduledTimer(
-            timeInterval: 1 / 2,
+            timeInterval: configuration.timerFireFrequency,
             target: self,
             selector: #selector(timerFired),
             userInfo: nil,
@@ -22,7 +30,7 @@ final class LoopTimer {
         )
     }
     
-    func stopTimer() {
+    func stop() {
         timer?.invalidate()
         timer = nil
     }
@@ -32,8 +40,6 @@ final class LoopTimer {
     }
     
     @objc private func timerFired() {
-        //TODO :do i need countdown?
-        countdown += 1
-        delegate?.loopTimerDidFire(self, with: countdown)
+        delegate?.loopTimerDidFire(self)
     }
 }

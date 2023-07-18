@@ -9,7 +9,7 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    private let gameLauncher = GameLauncher()
+    private var gameCoordinator: GameCoordinatorInput!  //TODO: fix
     
     let leftButton = UIButton(type: .system)
     let rightButton = UIButton(type: .system)
@@ -20,8 +20,10 @@ class ViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        gameLauncher.start()
-        gameLauncher.delegate = self
+        
+        gameCoordinator = GameAssembly().assemble(delegate: self)
+        
+        gameCoordinator.start()
         
         leftButton.addTarget(self, action: #selector(leftButtonDidTapped), for: .touchUpInside)
         rightButton.addTarget(self, action: #selector(rightButtonDidTapped), for: .touchUpInside)
@@ -69,33 +71,47 @@ class ViewController: UIViewController {
     }
 
     @objc func leftButtonDidTapped() {
-        gameLauncher.leftDidTapped()
+        gameCoordinator.left()
     }
     
     @objc func rightButtonDidTapped() {
-        gameLauncher.rightDidTapped()
+        gameCoordinator.right()
     }
     
     @objc func rotateButtonDidTapped() {
-        gameLauncher.rotateDidTapped()
+        gameCoordinator.rotate()
     }
     
     @objc func retryButtonDidTapped() {
-        gameLauncher.clean()
+        gameCoordinator.restart()
     }
 
 }
 
 //TODO: do better
-extension ViewController: GameLauncherDelegate {
-    func didUpdate(string: String) {
-//        let attributedString = NSMutableAttributedString(string: string)
-//        attributedString.addAttribute(NSAttributedString.Key.kern,
-//                                      value: 5,
-//                                      range: NSMakeRange(0, string.count - 1))
-//        label.attributedText = attributedString
+extension ViewController: GameCoordinatorDelegate {
+    func didRedrawPlayfield(_ coordinator: GameCoordinator, field: [[Bool]]) {
+        //        let attributedString = NSMutableAttributedString(string: string)
+        //        attributedString.addAttribute(NSAttributedString.Key.kern,
+        //                                      value: 5,
+        //                                      range: NSMakeRange(0, string.count - 1))
+        //        label.attributedText = attributedString
         
-        
-        label.text = string
+        var result: String = ""
+        for i in 0..<field.count {
+            var row = ""
+            for j in 0..<field[i].count {
+                let element = field[i][j]
+                if element {
+                    row.append("🐽")
+                } else {
+                    row.append("⬛")
+                }
+            }
+            result.append("\(row)\n")
+            row = ""
+        }
+
+        label.text = result
     }
 }

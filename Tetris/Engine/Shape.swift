@@ -67,10 +67,23 @@ struct Shape {
     var points: [CGPoint]
     var offset: CGPoint
     
-    init(type: ShapeType, points: [CGPoint], offset: CGPoint = CGPoint(x: 5, y: 0)) {
+    init(type: ShapeType,
+         points: [CGPoint],
+         configuration: GameConfiguration = .default) {
+        
         self.type = type
         self.points = points
-        self.offset = offset   //TODO: based on config
+        self.offset = CGPoint(x: CGFloat(configuration.width / 2).rounded(), y: 0)
+    }
+    
+    init(type: ShapeType,
+         points: [CGPoint],
+         configuration: GameConfiguration = .default,
+         offset: CGPoint) {
+        
+        self.type = type
+        self.points = points
+        self.offset = offset
     }
     
     //TODO: refactor
@@ -103,21 +116,4 @@ struct Shape {
         
         return Shape(type: self.type, points: shiftedPoints, offset: self.offset)
     }
-}
-
-final class ShapeFactory {
-    func generate() -> Shape {
-        guard let randomShape = ShapeType.allCases.randomElement() else {
-            return Shape(type: .I, points: ShapeType.I.points)
-        }
-        return Shape(type: randomShape, points: randomShape.points)
-    }
-}
-
-
-// What to do on left/right/rotate
-protocol InputHandler: AnyObject {
-    func leftDidTapped()
-    func rightDidTapped()
-    func rotateDidTapped()
 }

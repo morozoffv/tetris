@@ -2,34 +2,48 @@ import Foundation
 import UIKit
 
 protocol PlayfieldDelegate: AnyObject {
-    func playfieldGameEnded()
-    func didRedraw(string: String)
+    func playfieldGameEnded(_ playfield: Playfield)
+    func didRedrawPlayfield(_ playfield: Playfield, field: [[Bool]])
 }
 
-final class Playfield {
-    private var field: Array<Array<Bool>> = []
-    private var presentationField: Array<Array<Bool>> = []
+protocol PlayfieldInput {
+    func setup()
+    func moveDown()
+    func move(x: CGFloat)
+    func rotate()
+}
 
-    private var currentShape: Shape = Shape(points: [])
+final class Playfield: PlayfieldInput {
+    private var field: [[Bool]] = []
+    private var presentationField: [[Bool]] = []
+    private var currentShape: Shape = Shape(type: .I, points: [])
     
-    private let config: PlayfieldConfiguration
+    private let configuration: GameConfiguration
     private let shapeFactory: ShapeFactory
     
     weak var delegate: PlayfieldDelegate?
         
-    init(config: PlayfieldConfiguration, shapeFactory: ShapeFactory) {
-        self.config = config
+    init(configuration: GameConfiguration, shapeFactory: ShapeFactory) {
+        self.configuration = configuration
         self.shapeFactory = shapeFactory
-        
-        setupField()
+        setup()
     }
-
-    func update(with countdown: Int) {
-        moveDown()
+    
+    // MARK: - Public
+    
+    func setup() {
+        field = []
+        for _ in 0..<configuration.width {
+            field.append(Array(repeating: false, count: configuration.height))
+        }
+        presentationField = field
+        currentShape = shapeFactory.generate()
     }
     
     func moveDown() {
-        if !doesCollide(shape: currentShape, xOffset: currentShape.offset.x, yOffset: currentShape.offset.y + 1) {
+        if !doesCollide(shape: currentShape,
+                        xOffset: currentShape.offset.x,
+                        yOffset: currentShape.offset.y + 1) {
             currentShape.offset.y += 1;
         } else {
             placeShapeOnField()
@@ -38,7 +52,9 @@ final class Playfield {
     }
     
     func move(x: CGFloat) {
-        if !doesCollide(shape: currentShape, xOffset: currentShape.offset.x + x, yOffset: currentShape.offset.y) {
+        if !doesCollide(shape: currentShape,
+                        xOffset: currentShape.offset.x + x,
+                        yOffset: currentShape.offset.y) {
             currentShape.offset.x += x;
             redraw()
         }
@@ -46,26 +62,24 @@ final class Playfield {
     
     func rotate() {
         let rotatedShape = currentShape.rotated()
-        if !doesCollide(shape: rotatedShape, xOffset: rotatedShape.offset.x, yOffset: rotatedShape.offset.y) {
+        if !doesCollide(shape: rotatedShape,
+                        xOffset: rotatedShape.offset.x,
+                        yOffset: rotatedShape.offset.y) {
             currentShape = rotatedShape
             redraw()
         }
     }
-        
-    func doesCollide(shape: Shape, xOffset: CGFloat, yOffset: CGFloat) -> Bool {
+    
+    // MARK: - Private
+            
+    private func doesCollide(shape: Shape, xOffset: CGFloat, yOffset: CGFloat) -> Bool {
         for point in shape.points {
             let x = Int(point.x + xOffset)
             let y = Int(point.y + yOffset)
             
-            if y >= config.height {
-                return true
-            }
-            
-            if !(0..<config.width).contains(x) {
-                return true
-            }
-                        
-            if field[x][y] {
+            // If shape isn't within bounds of a field, or there is already a block in that coordinates,
+            // then shape collides
+            if y >= configuration.height || !(0..<configuration.width).contains(x) || field[x][y] {
                 return true
             }
         }
@@ -73,7 +87,7 @@ final class Playfield {
     }
     
     //TODO: refactor
-    func redraw() {
+    private func redraw() {
         presentationField = field
         
         for point in currentShape.points {
@@ -82,10 +96,12 @@ final class Playfield {
             
             presentationField[x][y] = true
         }
-        var transpondedPresentationField: Array<Array<Bool>> = []
         
-        for _ in 0..<config.height {
-            transpondedPresentationField.append(Array(repeating: false, count: config.width))
+        //TODO: change in place
+        var transpondedPresentationField: [[Bool]] = []
+        
+        for _ in 0..<configuration.height {
+            transpondedPresentationField.append(Array(repeating: false, count: configuration.width))
         }
         
         for i in 0..<presentationField.count {
@@ -93,28 +109,11 @@ final class Playfield {
                 transpondedPresentationField[j][i] = presentationField[i][j]
             }
         }
-
-        var result: String = ""
-        for i in 0..<transpondedPresentationField.count {
-            var row = ""
-            for j in 0..<transpondedPresentationField[i].count {
-                let element = transpondedPresentationField[i][j]
-                if element {
-                    row.append("🐽")
-                } else {
-                    row.append("⬛")
-                }
-            }
-            print(row)
-            result.append("\(row)\n")
-            row = ""
-        }
-//        print("\n")
         
-        delegate?.didRedraw(string: result)
+        delegate?.didRedrawPlayfield(self, field: transpondedPresentationField)
     }
     
-    func placeShapeOnField() {
+    private func placeShapeOnField() {
         for point in currentShape.points {
             let x = Int(point.x + currentShape.offset.x)
             let y = Int(point.y + currentShape.offset.y)
@@ -126,35 +125,20 @@ final class Playfield {
         
         currentShape = shapeFactory.generate()
         
-        //TODO: adapt to config
-        if doesCollide(shape: currentShape, xOffset: 5, yOffset: 0) {
-            delegate?.playfieldGameEnded()
+        if doesCollide(shape: currentShape,
+                       xOffset: currentShape.offset.x,
+                       yOffset: currentShape.offset.y) {
+            delegate?.playfieldGameEnded(self)
         }
     }
-    
-//    func removeRowsIfNeeded() {
-//        var spaceBetweenColumns = false
-//        for j in (0..<config.height).reversed() {
-//            for i in 0..<config.width {
-//                spaceBetweenColumns = !field[i][j]
-//                if spaceBetweenColumns {
-//                    break
-//                }
-//            }
-//            if !spaceBetweenColumns {
-//                removeRow(row: j)
-//            }
-//        }
-//    }
-    
-    
-    func removeRowsIfNeeded() {
+        
+    private func removeRowsIfNeeded() {
         var spaceBetweenColumns = false
-        var j = 20
+        var j = configuration.height
         while j >= 1 {
             j -= 1
             spaceBetweenColumns = false
-            for i in 0...9 {
+            for i in 0...configuration.width - 1 {
                 if field[i][j] == false {
                     spaceBetweenColumns = true
                     break
@@ -167,44 +151,11 @@ final class Playfield {
         }
     }
 
-    
     private func removeRow(row: Int) {
         for j in (0..<row).reversed() {
-            for i in 0...9 {
+            for i in 0...configuration.width - 1 {
                 field[i][j + 1] = field[i][j]
             }
         }
     }
-    
-//    private func removeRow(row: Int) {
-//        for j in 0...row {
-//            for i in 0..<config.width {
-//                field[i][j] = field[i][j - 1]
-//            }
-//        }
-//    }
-    
-    func setupField() {
-        field = []
-        for _ in 0..<config.width {
-            field.append(Array(repeating: false, count: config.height))
-        }
-        presentationField = field
-        currentShape = shapeFactory.generate()
-    }
-}
-
-extension Playfield: LoopTimerDelegate {
-    func loopTimerDidFire(_ loopTimer: LoopTimer, with countdown: Int) {
-        update(with: countdown)
-    }
-}
-
-struct PlayfieldConfiguration {
-    let width: Int
-    let height: Int
-}
-
-extension PlayfieldConfiguration {
-    static let `default` = PlayfieldConfiguration(width: 10, height: 20)
 }
