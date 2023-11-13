@@ -1,6 +1,10 @@
 import Foundation
 
-final class ShapeFactory {
+protocol ShapeFactoryInput {
+    func generate() -> Shape
+}
+
+final class ShapeFactory: ShapeFactoryInput {
     func generate() -> Shape {
         guard let randomShape = ShapeType.allCases.randomElement() else {
             return Shape(type: .I, points: ShapeType.I.points)

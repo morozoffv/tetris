@@ -19,11 +19,11 @@ final class Playfield: PlayfieldInput {
     private var currentShape: Shape = Shape(type: .I, points: [])
     
     private let configuration: GameConfiguration
-    private let shapeFactory: ShapeFactory
+    private let shapeFactory: ShapeFactoryInput
     
     weak var delegate: PlayfieldDelegate?
         
-    init(configuration: GameConfiguration, shapeFactory: ShapeFactory) {
+    init(configuration: GameConfiguration, shapeFactory: ShapeFactoryInput) {
         self.configuration = configuration
         self.shapeFactory = shapeFactory
         setup()
